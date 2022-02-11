@@ -60,7 +60,7 @@ jib {
         Assertions.assertEquals("""
 FROM scratch
 WORKDIR /app
-ADD .gradle/jib-app-cache/layers/dc868536733d758871eee4084c36cb15ec4dda25d638ea08d453cbe0548706e4/b08623b0d7e1dd41da18d54e4a1e30386ed932a587449b29c9adb757b12b9abe
+ADD .gradle/jib-app-cache/layers/5ad64458460e882544104696769164dc2b61f1136ace3b21d9ae6be25cb2bfa8/b08623b0d7e1dd41da18d54e4a1e30386ed932a587449b29c9adb757b12b9abe
 ENTRYPOINT ["/app/bin/test-case"]
 """.trim(),
             new File("${testProjectDir}/build/dockerfile/Dockerfile").text.trim()
@@ -69,7 +69,7 @@ ENTRYPOINT ["/app/bin/test-case"]
 # Ignore everything
 **
 # Allow required layer tars
-!.gradle/jib-app-cache/layers/dc868536733d758871eee4084c36cb15ec4dda25d638ea08d453cbe0548706e4/b08623b0d7e1dd41da18d54e4a1e30386ed932a587449b29c9adb757b12b9abe
+!.gradle/jib-app-cache/layers/5ad64458460e882544104696769164dc2b61f1136ace3b21d9ae6be25cb2bfa8/b08623b0d7e1dd41da18d54e4a1e30386ed932a587449b29c9adb757b12b9abe
 """.trim(),
                 new File("${testProjectDir}/build/dockerfile/Dockerfile.dockerignore").text.trim()
         )

@@ -10,10 +10,9 @@ group "com.bsycorp.gradle"
 version "1.0"
 
 java {
-    //old version to support as much old stuff as possible
-    JavaVersion javaVersion = JavaVersion.VERSION_11
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 }
 
 repositories {
