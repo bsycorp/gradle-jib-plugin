@@ -24,9 +24,6 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
     protected Logger logger;
 
     @Internal
-    protected JibExtension extension;
-
-    @Internal
     protected JibTaskSupport taskSupport;
 
     @Internal
@@ -37,6 +34,8 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
 
     @Internal
     protected abstract Property<NamedLockProvider> getLockProvider();
+
+    protected JibExtension extension;
 
     public BaseTask() {
         //TODO make this configurable
@@ -86,5 +85,9 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
     @Override
     public void sourceDistribution(CopySpec sourceDistribution) {
         this.sourceDistribution = sourceDistribution;
+    }
+
+    public File getImageOutputTarPath() {
+        return imageOutputTarPath;
     }
 }

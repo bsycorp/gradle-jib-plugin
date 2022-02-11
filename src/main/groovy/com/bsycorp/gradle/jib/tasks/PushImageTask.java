@@ -23,6 +23,10 @@ public abstract class PushImageTask extends BaseTask {
         projectName = getProject().getName();
     }
 
+    public String getProjectName() {
+        return projectName;
+    }
+
     @TaskAction
     public void fire() throws Exception {
         super.fire();
