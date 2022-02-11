@@ -1,13 +1,15 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '0.18.0'
+//    id 'com.gradle.plugin-publish' version '0.18.0'
     id 'groovy'
     id 'java-gradle-plugin'
 }
 
 group "com.bsycorp.gradle"
-version "1.0"
+if (findProperty("appVersion") != null){
+    version = findProperty("appVersion")
+}
 
 java {
     toolchain {
@@ -34,22 +36,22 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
-pluginBundle {
-    website = 'https://github.com/bsycorp/gradle-jib-plugin'
-    vcsUrl = 'https://github.com/bsycorp/gradle-jib-plugin.git'
-    tags = ['jib', 'docker', 'container']
-}
+//pluginBundle {
+//    website = 'https://github.com/bsycorp/gradle-jib-plugin'
+//    vcsUrl = 'https://github.com/bsycorp/gradle-jib-plugin.git'
+//    tags = ['jib', 'docker', 'container']
+//}
 
-gradlePlugin {
-    plugins {
-        jibPlugin {
-            id = "com.bsycorp.gradle.jib"
-            displayName = ""
-            description = ""
-            implementationClass = "com.bsycorp.gradle.jib.JibPlugin"
-        }
-    }
-}
+//gradlePlugin {
+//    plugins {
+//        jibPlugin {
+//            id = "com.bsycorp.gradle.jib"
+//            displayName = ""
+//            description = ""
+//            implementationClass = "com.bsycorp.gradle.jib.JibPlugin"
+//        }
+//    }
+//}
 
 publishing {
     repositories {

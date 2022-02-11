@@ -46,7 +46,6 @@ jib {
                 .withArguments("buildDockerImage", "-i", "--stacktrace")
                 .withPluginClasspath()
                 .build();
-        println result.getOutput();
 
         println FileUtils.listFiles(new File("${testProjectDir}/"), null, true).join("\n,")
         Assertions.assertEquals(TaskOutcome.SKIPPED, result.tasks.find { it.path == ":pullBaseImage" }.outcome)
@@ -71,7 +70,7 @@ ENTRYPOINT ["/app/bin/test-case"]
 # Allow required layer tars
 !.gradle/jib-app-cache/layers/5ad64458460e882544104696769164dc2b61f1136ace3b21d9ae6be25cb2bfa8/b08623b0d7e1dd41da18d54e4a1e30386ed932a587449b29c9adb757b12b9abe
 """.trim(),
-                new File("${testProjectDir}/build/dockerfile/Dockerfile.dockerignore").text.trim()
+            new File("${testProjectDir}/build/dockerfile/Dockerfile.dockerignore").text.trim()
         )
     }
 }
