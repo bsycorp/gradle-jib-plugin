@@ -27,27 +27,20 @@ public class JibExtension implements ImageInputs {
     public Property<Boolean> logProgress;
 
     public JibExtension(Project project) {
-        baseCachePath = project.getObjects().property(Path.class);
-        baseCachePath.set(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-base-cache"));
-        appCachePath = project.getObjects().property(Path.class);
-        appCachePath.set(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-app-cache"));
-        sourceDistributionName = project.getObjects().property(String.class);
-        sourceDistributionName.set("main");
-        layerFilters = project.getObjects().listProperty(LayerFilter.class);
-        layerFilters.set(Collections.emptyList());
-        timestampFromHash = project.getObjects().property(Boolean.class);
-        timestampFromHash.set(false);
+        baseCachePath = project.getObjects().property(Path.class)
+            .convention(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-base-cache"));
+        appCachePath = project.getObjects().property(Path.class)
+            .convention(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-app-cache"));
+        sourceDistributionName = project.getObjects().property(String.class).convention("main");
+        layerFilters = project.getObjects().listProperty(LayerFilter.class).convention(Collections.emptyList());
+        timestampFromHash = project.getObjects().property(Boolean.class).convention(false);
         baseContainer = project.getObjects().property(String.class);
         imageTag = project.getObjects().property(String.class);
         imageEntrypoint = project.getObjects().listProperty(String.class);
-        imagePullTimeout = project.getObjects().property(Duration.class);
-        imagePullTimeout.set(Duration.ofMinutes(2));
-        dockerBinaryPath = project.getObjects().property(String.class);
-        dockerBinaryPath.set("docker");
-        ensureReproducible = project.getObjects().property(Boolean.class);
-        ensureReproducible.set(true);
-        logProgress = project.getObjects().property(Boolean.class);
-        logProgress.set(false);
+        imagePullTimeout = project.getObjects().property(Duration.class).convention(Duration.ofMinutes(2));
+        dockerBinaryPath = project.getObjects().property(String.class).convention("docker");
+        ensureReproducible = project.getObjects().property(Boolean.class).convention(true);
+        logProgress = project.getObjects().property(Boolean.class).convention(false);
     }
 
     public Property<Path> getBaseCachePath() {

@@ -120,7 +120,7 @@ application {
     mainClass = 'test.Main'
 }
 jib {
-    imageTag = 'test-image'
+    imageTag = provider { 'test-image' }
     baseContainer = 'alpine:latest'
     layerFilters = [
         layerFilter('all', '/', { details -> details })
