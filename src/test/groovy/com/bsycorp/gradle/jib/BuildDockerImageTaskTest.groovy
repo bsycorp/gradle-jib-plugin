@@ -26,7 +26,7 @@ class BuildDockerImageTaskTest {
     @Test
     void shouldRunSuccessfully() {
         buildFile.text = """
-plugins { id 'com.bsycorp.gradle.jib' }
+plugins { id 'io.github.bsycorp.jib' }
 plugins { id 'application' }
 application {
     mainClass = 'test.Main'

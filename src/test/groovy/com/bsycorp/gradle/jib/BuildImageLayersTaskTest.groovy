@@ -27,7 +27,7 @@ class BuildImageLayersTaskTest {
     void shouldConfigureTaskSuccessfully() {
         buildFile.text = """
 plugins { id 'distribution' }
-plugins { id 'com.bsycorp.gradle.jib' }
+plugins { id 'io.github.bsycorp.jib' }
 jib {
     imageTag = 'test-image'
     baseContainer = 'bitnami/minideb:bullseye'
@@ -44,7 +44,7 @@ jib {
     @Test
     void shouldFailWithMissingDistribution() {
         buildFile.text = """
-plugins { id 'com.bsycorp.gradle.jib' }
+plugins { id 'io.github.bsycorp.jib' }
 plugins { id 'application' }
 application {
     mainClass = 'test.Main'
@@ -73,7 +73,7 @@ jib {
 package test;
 """
         buildFile.text = """
-plugins { id 'com.bsycorp.gradle.jib' }
+plugins { id 'io.github.bsycorp.jib' }
 plugins { id 'application' }
 application {
     mainClass = 'test.Main'
@@ -115,7 +115,7 @@ package test;
 """
         buildFile.text = """
 plugins { id 'application' }
-plugins { id 'com.bsycorp.gradle.jib' }
+plugins { id 'io.github.bsycorp.jib' }
 application {
     mainClass = 'test.Main'
 }

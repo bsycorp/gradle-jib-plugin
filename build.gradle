@@ -1,12 +1,11 @@
 plugins {
     id 'java'
     id 'maven-publish'
-//    id 'com.gradle.plugin-publish' version '0.18.0'
+    id 'com.gradle.plugin-publish' version '0.18.0'
     id 'groovy'
     id 'java-gradle-plugin'
 }
 
-group "com.bsycorp.gradle"
 if (findProperty("appVersion") != null){
     version = findProperty("appVersion")
 }
@@ -36,22 +35,22 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
-//pluginBundle {
-//    website = 'https://github.com/bsycorp/gradle-jib-plugin'
-//    vcsUrl = 'https://github.com/bsycorp/gradle-jib-plugin.git'
-//    tags = ['jib', 'docker', 'container']
-//}
+pluginBundle {
+    website = 'https://github.com/bsycorp/gradle-jib-plugin'
+    vcsUrl = 'https://github.com/bsycorp/gradle-jib-plugin.git'
+    tags = ['jib', 'docker', 'container']
+}
 
-//gradlePlugin {
-//    plugins {
-//        jibPlugin {
-//            id = "com.bsycorp.gradle.jib"
-//            displayName = ""
-//            description = ""
-//            implementationClass = "com.bsycorp.gradle.jib.JibPlugin"
-//        }
-//    }
-//}
+gradlePlugin {
+    plugins {
+        jibPlugin {
+            id = "io.github.bsycorp.jib"
+            displayName = ""
+            description = ""
+            implementationClass = "com.bsycorp.gradle.jib.JibPlugin"
+        }
+    }
+}
 
 publishing {
     repositories {
@@ -62,14 +61,6 @@ publishing {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
             }
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.bsycorp.gradle'
-            artifactId = 'gradle-jib-plugin'
-            version = findProperty("appVersion")
-            from components.java
         }
     }
 }
