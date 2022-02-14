@@ -2,7 +2,6 @@ package com.bsycorp.gradle.jib
 
 import com.bsycorp.gradle.jib.tasks.ImageInputs
 import org.gradle.api.Project
-import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 
@@ -95,8 +94,8 @@ public class JibExtension implements ImageInputs {
         return logProgress
     }
 //Helper method for defining layers
-    public LayerFilter layerFilter(String name, String destinationPath, Closure<FileCopyDetails> filter) {
+    public LayerFilter layerFilter(String name, String destinationPath, Closure filter) {
         //gotta dehydrate so it can serialise
-        return new LayerFilter(name, destinationPath, filter.dehydrate() as Function<FileCopyDetails, FileCopyDetails>)
+        return new LayerFilter(name, destinationPath, filter.dehydrate() as Function<LayerFilterFile, LayerFilterFile>)
     }
 }

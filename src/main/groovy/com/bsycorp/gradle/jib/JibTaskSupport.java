@@ -40,7 +40,7 @@ public class JibTaskSupport {
         this.objectFactory = objectFactory;
     }
 
-    public List<FileCopyDetails> getFilesForLayer(CopySpec sourceDistributionFiles, Function<FileCopyDetails, FileCopyDetails> filter) {
+    public List<FileCopyDetails> getFilesForLayer(CopySpec sourceDistributionFiles, List<FileCopyDetails> filesAlreadyAddedToImage, Function<LayerFilterFile, LayerFilterFile> filter) {
         List<FileCopyDetails> layerFiles = new ArrayList();
 
         //use the innards of a CopyAction to resolve the CopySpec into a set of FileCopyDetails _after_ renaming / processing
@@ -49,10 +49,11 @@ public class JibTaskSupport {
         //but we can avoid the entire tar step doing it this way
         CopyAction copyAction = (stream) -> {
             stream.process(details -> {
-                FileCopyDetails result = filter.apply(details);
+                LayerFilterFile result = filter.apply(new LayerFilterFile(details, filesAlreadyAddedToImage.contains(details)));
                 if(result != null) {
-                    layerFiles.add(result);
-                    logger.info("Added file: " + result.getFile() + "  " + result.getPath());
+                    layerFiles.add(result.getDetails());
+                    filesAlreadyAddedToImage.add(result.getDetails());
+                    logger.info("Added file: " + result.getDetails().getFile() + "  " + result.getPath());
                 }
             });
             return WorkResults.didWork(true);
@@ -128,9 +129,10 @@ public class JibTaskSupport {
             logger.warn("No layers configured!");
         }
 
+        List<FileCopyDetails> filesAlreadyAddedToImage = new ArrayList<>();
         for (LayerFilter filter : layerFilters) {
             logger.info("Processing image layer named: " + filter.getName());
-            List<FileCopyDetails> filterFiles = getFilesForLayer(sourceDistributionFiles, filter.getFilter());
+            List<FileCopyDetails> filterFiles = getFilesForLayer(sourceDistributionFiles, filesAlreadyAddedToImage, filter.getFilter());
             FileEntriesLayer filterLayer = getLayerForFiles(filterFiles, filter.getDestinationPath(), timestampFromHash);
             containerBuilder
                     .addFileEntriesLayer(filterLayer);

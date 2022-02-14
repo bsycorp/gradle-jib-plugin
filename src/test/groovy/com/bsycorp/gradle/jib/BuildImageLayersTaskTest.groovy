@@ -107,6 +107,47 @@ jib {
     }
 
     @Test
+    void shouldBuildMultiLayerFromScratchSuccessfully() {
+        File mainClass = new File(testProjectDir, "src/main/java/test/Main.java");
+        mainClass.getParentFile().mkdirs();
+        mainClass.text = """
+package test;
+"""
+        buildFile.text = """
+plugins { id 'io.github.bsycorp.jib' }
+plugins { id 'application' }
+application {
+    mainClass = 'test.Main'
+}
+jib {
+    imageTag = 'test-image'
+    baseContainer = 'scratch'
+    layerFilters = [
+        layerFilter('jars', '/', { details -> details.name.endsWith(".jar") ? details : null }),
+        layerFilter('scripts', '/', { details -> !details.alreadyAddedToImage ? details : null })
+    ]
+}
+"""
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("buildImageLayers", "-i", "--stacktrace")
+                .withPluginClasspath()
+                .build();
+        Assertions.assertEquals(TaskOutcome.SKIPPED, result.tasks.find { it.path == ":pullBaseImage" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":jar" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":startScripts" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":buildImageLayers" }.outcome)
+
+        //assert built output
+        //from scratch so 0 base cache items
+        Assertions.assertEquals(0, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-base-cache/"), null, true).size());
+        //2 layers should exist
+        Assertions.assertEquals(2, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-app-cache/layers/"), null, true).size());
+        //and image tar should be there too
+        Assertions.assertTrue(new File("${testProjectDir}/build/image-tar/image.tar").exists())
+    }
+
+    @Test
     void shouldBuildLayerFromImageSuccessfully() {
         File mainClass = new File(testProjectDir, "src/main/java/test/Main.java");
         mainClass.getParentFile().mkdirs();

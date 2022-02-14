@@ -1,6 +1,5 @@
 package com.bsycorp.gradle.jib;
 
-import org.gradle.api.file.FileCopyDetails;
 import java.io.Serializable;
 import java.util.function.Function;
 
@@ -12,9 +11,9 @@ public class LayerFilter implements Serializable {
 
     public String destinationPath;
 
-    public Function<FileCopyDetails, FileCopyDetails> filter;
+    public Function<LayerFilterFile, LayerFilterFile> filter;
 
-    public LayerFilter(String name, String destinationPath, Function<FileCopyDetails, FileCopyDetails> filter) {
+    public LayerFilter(String name, String destinationPath, Function<LayerFilterFile, LayerFilterFile> filter) {
         this.name = name;
         this.destinationPath = destinationPath;
         this.filter = filter;
@@ -28,7 +27,7 @@ public class LayerFilter implements Serializable {
         return destinationPath;
     }
 
-    public Function<FileCopyDetails, FileCopyDetails> getFilter() {
+    public Function<LayerFilterFile, LayerFilterFile> getFilter() {
         return filter;
     }
 }
