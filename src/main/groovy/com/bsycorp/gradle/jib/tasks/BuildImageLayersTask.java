@@ -12,7 +12,7 @@ public abstract class BuildImageLayersTask extends BaseTask {
         super();
         dependsOn("pullBaseImage");
 
-        getProject().getPlugins().withType(ApplicationPlugin.class, newPlugin ->  {
+        getProject().getPlugins().withType(ApplicationPlugin.class, newPlugin -> {
             //otherwise the distribution won't contain the /bin/blah.bat etc files
             dependsOn("startScripts");
         });
@@ -35,14 +35,11 @@ public abstract class BuildImageLayersTask extends BaseTask {
         super.fire();
 
         logger.info("Building image layers..");
-        Containerizer tarContainer = Containerizer
-            .to(TarImage.at(imageOutputTarPath.toPath()).named("image"))
-            .setBaseImageLayersCache(extension.getBaseCachePath().get())
-            .setApplicationLayersCache(extension.getAppCachePath().get())
-            .setOfflineMode(true); //base pull via pullImageBase so no need for online
+        Containerizer tarContainer = taskSupport.getContainerizer(TarImage.at(imageOutputTarPath.toPath()).named("image"))
+                .setOfflineMode(true); //base pull via pullImageBase so no need for online
 
         taskSupport.getJibContainer(this, sourceDistribution)
-            .containerize(tarContainer);
+                .containerize(tarContainer);
     }
 
 }

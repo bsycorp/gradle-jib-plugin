@@ -3,7 +3,6 @@ package com.bsycorp.gradle.jib.tasks;
 import com.bsycorp.gradle.jib.NamedLockProvider;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.Jib;
-import com.google.cloud.tools.jib.api.JibContainerBuilder;
 import com.google.cloud.tools.jib.api.RegistryImage;
 import com.google.cloud.tools.jib.api.TarImage;
 import org.gradle.api.provider.Provider;
@@ -36,13 +35,8 @@ public abstract class PullBaseImageTask extends BaseTask {
         if (baseContainerLock.tryLock(extension.getImagePullTimeout().get().toSeconds(), TimeUnit.SECONDS)) {
             try {
                 RegistryImage registryImage = taskSupport.getJibRegistryImage(containerBase);
-                JibContainerBuilder containerBuilder = Jib.from(registryImage);
-
-                Containerizer tarContainer = Containerizer
-                    .to(TarImage.at(Paths.get("/dev/null")).named("base"))
-                    .setBaseImageLayersCache(extension.getBaseCachePath().get());
-
-                containerBuilder
+                Containerizer tarContainer = taskSupport.getContainerizer(TarImage.at(Paths.get("/dev/null")).named("base"));
+                Jib.from(registryImage)
                     .containerize(tarContainer);
             } finally {
                 baseContainerLock.unlock();

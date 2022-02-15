@@ -47,7 +47,6 @@ jib {
                 .withPluginClasspath()
                 .build();
 
-        println FileUtils.listFiles(new File("${testProjectDir}/"), null, true).join("\n,")
         Assertions.assertEquals(TaskOutcome.SKIPPED, result.tasks.find { it.path == ":pullBaseImage" }.outcome)
         Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":jar" }.outcome)
         Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":startScripts" }.outcome)

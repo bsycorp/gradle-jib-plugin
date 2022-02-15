@@ -32,8 +32,7 @@ public abstract class PushImageTask extends BaseTask {
         super.fire();
 
         JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, sourceDistribution);
-        Containerizer output = Containerizer
-                .to(taskSupport.getJibRegistryImage(imageTag.get()));
+        Containerizer output = taskSupport.getContainerizer(taskSupport.getJibRegistryImage(imageTag.get()));
         if (extension.getLogProgress().get()) {
             output.addEventHandler(TimerEvent.class, timeEvent -> {
                 logger.warn(projectName + ": " + timeEvent.getDescription() + " " + timeEvent.getState() + " after " + timeEvent.getElapsed().toMillis() + "ms");

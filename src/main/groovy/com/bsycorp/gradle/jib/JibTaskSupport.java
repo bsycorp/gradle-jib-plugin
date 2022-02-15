@@ -1,11 +1,13 @@
 package com.bsycorp.gradle.jib;
 
 import com.bsycorp.gradle.jib.tasks.ImageInputs;
+import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.ImageReference;
 import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
 import com.google.cloud.tools.jib.api.Jib;
 import com.google.cloud.tools.jib.api.JibContainerBuilder;
 import com.google.cloud.tools.jib.api.RegistryImage;
+import com.google.cloud.tools.jib.api.TarImage;
 import com.google.cloud.tools.jib.api.buildplan.AbsoluteUnixPath;
 import com.google.cloud.tools.jib.api.buildplan.FileEntriesLayer;
 import com.google.cloud.tools.jib.api.buildplan.FilePermissions;
@@ -142,6 +144,18 @@ public class JibTaskSupport {
             containerBuilder.setEntrypoint(entrypoint);
         }
         return containerBuilder;
+    }
+
+    public Containerizer getContainerizer(RegistryImage image) {
+        return Containerizer.to(image)
+                .setBaseImageLayersCache(extension.getBaseCachePath().get())
+                .setApplicationLayersCache(extension.getAppCachePath().get());
+    }
+
+    public Containerizer getContainerizer(TarImage image) {
+        return Containerizer.to(image)
+                .setBaseImageLayersCache(extension.getBaseCachePath().get())
+                .setApplicationLayersCache(extension.getAppCachePath().get());
     }
 
 }
