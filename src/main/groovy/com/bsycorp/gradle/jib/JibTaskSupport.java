@@ -107,7 +107,7 @@ public class JibTaskSupport {
 
         } else if (System.getenv("DOCKER_HUB_ACCESS_TOKEN_VALUE") != null) {
             //otherwise assume docker hub if have creds
-            registryImage.addCredential("pro1svc", System.getenv("DOCKER_HUB_ACCESS_TOKEN_VALUE"));
+            registryImage.addCredential(System.getenv("DOCKER_HUB_ACCESS_USER"), System.getenv("DOCKER_HUB_ACCESS_TOKEN_VALUE"));
         }
         return registryImage;
     }
