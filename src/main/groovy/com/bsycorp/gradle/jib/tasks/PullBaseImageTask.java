@@ -5,7 +5,8 @@ import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.Jib;
 import com.google.cloud.tools.jib.api.RegistryImage;
 import com.google.cloud.tools.jib.api.TarImage;
-import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
@@ -13,12 +14,11 @@ import java.util.concurrent.locks.Lock;
 
 public abstract class PullBaseImageTask extends BaseTask {
 
+    @Internal
+    public abstract Property<NamedLockProvider> getLockProvider();
+
     public PullBaseImageTask() {
         super();
-
-        Provider<NamedLockProvider> lockProvider = getProject().getGradle().getSharedServices().registerIfAbsent("namedLocks", NamedLockProvider.class, spec -> {        });
-        usesService(lockProvider);
-        getLockProvider().set(lockProvider.get());
 
         //don't need to pull base image if base is scratch
         onlyIf(task -> !getBaseContainer().get().equals("scratch"));

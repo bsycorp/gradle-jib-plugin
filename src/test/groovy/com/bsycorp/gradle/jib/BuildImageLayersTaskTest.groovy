@@ -35,10 +35,18 @@ jib {
 """
         GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("buildImageLayers", "pushImage", "buildDockerImage", "--dry-run", "--stacktrace")
+                .withArguments("buildImageLayers", "pushImage", "buildDockerImage", "--dry-run", "--stacktrace", "--configuration-cache")
                 .withPluginClasspath()
                 .build();
         //no exp means pass
+
+        //run again to test config cache
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("buildImageLayers", "pushImage", "buildDockerImage", "--dry-run", "--stacktrace", "--configuration-cache")
+                .withPluginClasspath()
+                .build();
+        Assertions.assertTrue(result.getOutput().contains("configuration cache"));
     }
 
     @Test

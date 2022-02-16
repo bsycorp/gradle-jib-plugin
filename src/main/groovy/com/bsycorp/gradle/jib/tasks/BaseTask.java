@@ -2,12 +2,10 @@ package com.bsycorp.gradle.jib.tasks;
 
 import com.bsycorp.gradle.jib.JibExtension;
 import com.bsycorp.gradle.jib.JibTaskSupport;
-import com.bsycorp.gradle.jib.NamedLockProvider;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.model.ObjectFactory;
-import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.Internal;
 import java.io.File;
@@ -31,9 +29,6 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
 
     @Internal
     protected CopySpec sourceDistribution;
-
-    @Internal
-    protected abstract Property<NamedLockProvider> getLockProvider();
 
     protected JibExtension extension;
 
