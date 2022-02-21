@@ -8,7 +8,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.Internal;
-import java.io.File;
 import javax.inject.Inject;
 
 public abstract class BaseTask extends DefaultTask implements TaskProperties {
@@ -25,16 +24,11 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
     protected JibTaskSupport taskSupport;
 
     @Internal
-    protected File imageOutputTarPath;
-
-    @Internal
     protected CopySpec sourceDistribution;
 
     protected JibExtension extension;
 
     public BaseTask() {
-        //TODO make this configurable
-        imageOutputTarPath = getProject().getBuildDir().toPath().resolve("image-tar/image.tar").toFile();
         setupProperties(getProject());
     }
 
@@ -82,7 +76,4 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
         this.sourceDistribution = sourceDistribution;
     }
 
-    public File getImageOutputTarPath() {
-        return imageOutputTarPath;
-    }
 }

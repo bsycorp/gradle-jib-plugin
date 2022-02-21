@@ -29,22 +29,22 @@ public interface TaskProperties extends ImageInputs {
         taskSupport(new JibTaskSupport(project.getLogger(), extension(), project.getObjects()));
 
         if (extension().getSourceDistributionName().isPresent()) {
-            getSourceDistributionName().set(extension().getSourceDistributionName().get());
+            getSourceDistributionName().set(extension().getSourceDistributionName());
         }
         if (extension().getLayerFilters().isPresent()) {
-            getLayerFilters().set(extension().getLayerFilters().get());
+            getLayerFilters().set(extension().getLayerFilters());
         }
         if (extension().getTimestampFromHash().isPresent()) {
-            getTimestampFromHash().set(extension().getTimestampFromHash().get());
+            getTimestampFromHash().set(extension().getTimestampFromHash());
         }
         if (extension().getBaseContainer().isPresent()) {
-            getBaseContainer().set(extension().getBaseContainer().get());
+            getBaseContainer().set(extension().getBaseContainer());
         }
         if (extension().getImageTag().isPresent()) {
-            getImageTag().set(extension().getImageTag().get());
+            getImageTag().set(extension().getImageTag());
         }
         if (extension().getImageEntrypoint().isPresent()) {
-            getImageEntrypoint().set(extension().getImageEntrypoint().get());
+            getImageEntrypoint().set(extension().getImageEntrypoint());
         }
 
         project.getPlugins().withType(DistributionPlugin.class, newPlugin ->  {

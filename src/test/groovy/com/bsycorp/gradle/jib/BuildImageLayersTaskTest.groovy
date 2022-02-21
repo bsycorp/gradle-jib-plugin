@@ -88,6 +88,7 @@ application {
 }
 jib {
     imageTag = 'test-image'
+    imageOutputTarFile = new File("diff-image-path/image.tar", buildDir)
     baseContainer = 'scratch'
     layerFilters = [
         layerFilter('jars', '/', { details -> details.name.endsWith(".jar") ? details : null }),
@@ -111,7 +112,8 @@ jib {
         //2 layers should exist
         Assertions.assertEquals(2, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-app-cache/layers/"), null, true).size());
         //and image tar should be there too
-        Assertions.assertTrue(new File("${testProjectDir}/build/image-tar/image.tar").exists())
+        Assertions.assertTrue(new File("${testProjectDir}/build/diff-image-path/image.tar").exists())
+        Assertions.assertTrue(new File("${testProjectDir}/build/diff-image-path/image.image-id").exists())
     }
 
     @Test
