@@ -38,7 +38,7 @@ public class JibExtension implements ImageInputs {
         imageTag = project.getObjects().property(String.class);
         imageEntrypoint = project.getObjects().listProperty(String.class);
         imagePullTimeout = project.getObjects().property(Duration.class).convention(Duration.ofMinutes(2));
-        imageOutputTarFile = project.getObjects().property(File.class).convention(new File("image-tar/image.tar", project.getBuildDir()));
+        imageOutputTarFile = project.getObjects().property(File.class).convention(new File(project.getBuildDir(), "image-tar/image.tar"));
         dockerBinaryPath = project.getObjects().property(String.class).convention("docker");
         ensureReproducible = project.getObjects().property(Boolean.class).convention(true);
         logProgress = project.getObjects().property(Boolean.class).convention(false);
