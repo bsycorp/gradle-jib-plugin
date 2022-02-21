@@ -28,24 +28,12 @@ public interface TaskProperties extends ImageInputs {
         extension(project.getExtensions().findByType(JibExtension.class));
         taskSupport(new JibTaskSupport(project.getLogger(), extension(), project.getObjects()));
 
-        if (extension().getSourceDistributionName().isPresent()) {
-            getSourceDistributionName().set(extension().getSourceDistributionName());
-        }
-        if (extension().getLayerFilters().isPresent()) {
-            getLayerFilters().set(extension().getLayerFilters());
-        }
-        if (extension().getTimestampFromHash().isPresent()) {
-            getTimestampFromHash().set(extension().getTimestampFromHash());
-        }
-        if (extension().getBaseContainer().isPresent()) {
-            getBaseContainer().set(extension().getBaseContainer());
-        }
-        if (extension().getImageTag().isPresent()) {
-            getImageTag().set(extension().getImageTag());
-        }
-        if (extension().getImageEntrypoint().isPresent()) {
-            getImageEntrypoint().set(extension().getImageEntrypoint());
-        }
+        getSourceDistributionName().set(extension().getSourceDistributionName());
+        getLayerFilters().set(extension().getLayerFilters());
+        getTimestampFromHash().set(extension().getTimestampFromHash());
+        getBaseContainer().set(extension().getBaseContainer());
+        getImageTag().set(extension().getImageTag());
+        getImageEntrypoint().set(extension().getImageEntrypoint());
 
         project.getPlugins().withType(DistributionPlugin.class, newPlugin ->  {
             DistributionContainer container = project.getExtensions().findByType(DistributionContainer.class);
