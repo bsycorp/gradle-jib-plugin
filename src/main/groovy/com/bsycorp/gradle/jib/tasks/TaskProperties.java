@@ -32,7 +32,6 @@ public interface TaskProperties extends ImageInputs {
         getLayerFilters().set(extension().getLayerFilters());
         getTimestampFromHash().set(extension().getTimestampFromHash());
         getBaseContainer().set(extension().getBaseContainer());
-        getImageTag().set(extension().getImageTag());
         getImageEntrypoint().set(extension().getImageEntrypoint());
 
         project.getPlugins().withType(DistributionPlugin.class, newPlugin ->  {

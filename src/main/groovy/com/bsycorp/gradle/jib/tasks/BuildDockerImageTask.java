@@ -12,7 +12,9 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Exec;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.nio.file.Path;
@@ -30,11 +32,17 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
     private Path rootProjectPath;
     private File projectBuildDir;
 
+    @Input
+    public abstract Property<String> getImageTag();
+
     public BuildDockerImageTask() {
         super();
         setupProperties(getProject());
+        getImageTag().set(extension().getImageTag());
+
         this.rootProjectPath = getProject().getRootProject().getProjectDir().toPath();
         this.projectBuildDir = getProject().getBuildDir();
+
 
         dependsOn("buildImageLayers");
     }

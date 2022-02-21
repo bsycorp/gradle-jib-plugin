@@ -32,7 +32,7 @@ application {
     mainClass = 'test.Main'
 }
 jib {
-    imageTag = 'test-image'
+    imageTag = provider { -> 'test-image:' + new File("image-tar/image.image-id", buildDir).text }
     imageEntrypoint = ['/app/bin/test-case']
     baseContainer = 'scratch'
     layerFilters = [

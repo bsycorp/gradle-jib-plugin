@@ -8,9 +8,6 @@ import org.gradle.api.tasks.Optional;
 
 public interface ImageInputs {
 
-    @Input
-    Property<String> getImageTag();
-
     @Optional
     @Input
     ListProperty<String> getImageEntrypoint();

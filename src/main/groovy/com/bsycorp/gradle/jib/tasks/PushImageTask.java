@@ -12,7 +12,7 @@ import org.gradle.api.tasks.TaskAction;
 public abstract class PushImageTask extends BaseTask {
 
     @Input
-    public Property<String> imageTag;
+    public abstract Property<String> getImageTag();
 
     @Internal
     private String projectName;
@@ -21,6 +21,7 @@ public abstract class PushImageTask extends BaseTask {
         super();
         dependsOn("buildImageLayers");
         projectName = getProject().getName();
+        getImageTag().set(extension().getImageTag());
     }
 
     public String getProjectName() {
@@ -32,7 +33,7 @@ public abstract class PushImageTask extends BaseTask {
         super.fire();
 
         JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, sourceDistribution);
-        Containerizer output = taskSupport.getContainerizer(taskSupport.getJibRegistryImage(imageTag.get()));
+        Containerizer output = taskSupport.getContainerizer(taskSupport.getJibRegistryImage(getImageTag().get()));
         if (extension.getLogProgress().get()) {
             output.addEventHandler(TimerEvent.class, timeEvent -> {
                 logger.warn(projectName + ": " + timeEvent.getDescription() + " " + timeEvent.getState() + " after " + timeEvent.getElapsed().toMillis() + "ms");
