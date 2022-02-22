@@ -43,7 +43,6 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
         this.rootProjectPath = getProject().getRootProject().getProjectDir().toPath();
         this.projectBuildDir = getProject().getBuildDir();
 
-
         dependsOn("buildImageLayers");
     }
 

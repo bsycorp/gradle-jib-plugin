@@ -44,7 +44,8 @@ Project-wide configuration looks like:
 jib {
     //required
     imageTag = 'some-registry/image-name:version' or { -> "${someDynamicValue}" }
-    baseContainer = 'some-registry/image-name:version' or 'scratch'
+    //if the sha256 digest is not included a remote registry will occur for each execution 
+    baseContainer = 'some-registry/image-name:version@sha256:digest' or 'scratch'
     imageEntrypoint = ["/entrypoint.sh"]
     
     //where most of the complexity will be, defining the layers in order
