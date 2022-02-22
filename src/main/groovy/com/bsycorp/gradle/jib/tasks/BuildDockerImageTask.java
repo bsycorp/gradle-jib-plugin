@@ -82,7 +82,7 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
             dockerIgnoreFileContent.append("**" + "\n");
             dockerIgnoreFileContent.append("# Allow required layer tars" + "\n");
             for (String layerTar : layerTars) {
-                dockerFileContent.append("ADD " + layerTar + "\n");
+                dockerFileContent.append("ADD " + layerTar + " /" + "\n");
                 dockerIgnoreFileContent.append("!" + layerTar + "\n");
             }
             if (containerBuildPlan.getEntrypoint() != null) {
