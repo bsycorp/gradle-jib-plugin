@@ -66,7 +66,7 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
                     //guard against missing / unbuilt layers, should be built already by buildImageLayers
                     Optional<CachedLayer> cacheForLayer = jibCache.retrieve(ImmutableList.copyOf(layer.getEntries()));
                     if (cacheForLayer.isEmpty()) {
-                        throw new Exception("Cached layer is missing for resource layer");
+                        throw new Exception("Cached layer is missing for layer " + layer.getName());
                     }
                     Path cacheTarForLayer = extension.getAppCachePath().get().resolve("layers/" + cacheForLayer.get().getDigest().getHash() + "/" + cacheForLayer.get().getDiffId().getHash());
                     layerTars.add(rootProjectPath.relativize(cacheTarForLayer).toString());
