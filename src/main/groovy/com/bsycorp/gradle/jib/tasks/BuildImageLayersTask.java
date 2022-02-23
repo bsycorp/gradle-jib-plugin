@@ -1,5 +1,6 @@
 package com.bsycorp.gradle.jib.tasks;
 
+import com.bsycorp.gradle.jib.models.BuiltImageInputs;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.JibContainer;
 import com.google.cloud.tools.jib.api.TarImage;
@@ -11,7 +12,7 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 
-public abstract class BuildImageLayersTask extends BaseTask {
+public abstract class BuildImageLayersTask extends BaseTask implements BuiltImageInputs {
 
     @OutputFile
     public abstract Property<File> getImageOutputTarFile();
@@ -21,8 +22,9 @@ public abstract class BuildImageLayersTask extends BaseTask {
 
     public BuildImageLayersTask() {
         super();
-        dependsOn("pullBaseImage");
+        setupBuiltImageInputs(getProject(), extension);
 
+        dependsOn("pullBaseImage");
         getProject().getPlugins().withType(ApplicationPlugin.class, newPlugin -> {
             //otherwise the distribution won't contain the /bin/blah.bat etc files
             dependsOn("startScripts");
@@ -41,16 +43,14 @@ public abstract class BuildImageLayersTask extends BaseTask {
         getImageOutputImageIdFile().set(new File(extension.getImageOutputTarFile().get().getParentFile(), "image.image-id"));
     }
 
-    @Override
     @TaskAction
     public void fire() throws Exception {
-        super.fire();
 
         logger.info("Building image layers..");
         Containerizer tarContainer = taskSupport.getContainerizer(TarImage.at(extension.getImageOutputTarFile().get().toPath()).named("image"))
                 .setOfflineMode(true); //base pull via pullImageBase so no need for online
 
-        JibContainer builtContainer = taskSupport.getJibContainer(this, sourceDistribution)
+        JibContainer builtContainer = taskSupport.getJibContainer(this, getSourceCopySpec().get())
                 .containerize(tarContainer);
         //write out image id so can be used by other tasks
         FileUtils.writeStringToFile(
@@ -60,5 +60,4 @@ public abstract class BuildImageLayersTask extends BaseTask {
         );
 
     }
-
 }

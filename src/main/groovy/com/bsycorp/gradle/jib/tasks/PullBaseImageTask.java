@@ -1,6 +1,7 @@
 package com.bsycorp.gradle.jib.tasks;
 
 import com.bsycorp.gradle.jib.NamedLockProvider;
+import com.bsycorp.gradle.jib.models.BaseImageInputs;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.Jib;
 import com.google.cloud.tools.jib.api.RegistryImage;
@@ -12,13 +13,14 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
-public abstract class PullBaseImageTask extends BaseTask {
+public abstract class PullBaseImageTask extends BaseTask implements BaseImageInputs {
 
     @Internal
     public abstract Property<NamedLockProvider> getLockProvider();
 
     public PullBaseImageTask() {
         super();
+        setupBaseImageInputs(getProject(), extension);
 
         //don't need to pull base image if base is scratch
         onlyIf(task -> !getBaseContainer().get().equals("scratch"));
@@ -26,8 +28,6 @@ public abstract class PullBaseImageTask extends BaseTask {
 
     @TaskAction
     public void fire() throws Exception {
-        super.fire();
-
         //we need to put a lock around jib as its got some problem with concurrent pulls from docker hub, very weird but fails with UNAUTHORIZED if concurrency is too high
         //https://github.com/GoogleContainerTools/jib/issues/2007
         String containerBase = getBaseContainer().get();

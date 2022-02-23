@@ -2,8 +2,8 @@ package com.bsycorp.gradle.jib.tasks;
 
 import com.bsycorp.gradle.jib.JibExtension;
 import com.bsycorp.gradle.jib.JibTaskSupport;
+import com.bsycorp.gradle.jib.models.TaskProperties;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.CopySpec;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ProviderFactory;
@@ -23,19 +23,10 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
     @Internal
     protected JibTaskSupport taskSupport;
 
-    @Internal
-    protected CopySpec sourceDistribution;
-
     protected JibExtension extension;
 
     public BaseTask() {
         setupProperties(getProject());
-    }
-
-    public void fire() throws Exception {
-        if (sourceDistribution == null) {
-            throw new RuntimeException("Source distribution named '" + getSourceDistributionName().get() + "' wasn't found");
-        }
     }
 
     @Override
@@ -67,13 +58,5 @@ public abstract class BaseTask extends DefaultTask implements TaskProperties {
         this.taskSupport = taskSupport;
     }
 
-    public CopySpec getSourceDistribution() {
-        return sourceDistribution;
-    }
-
-    @Override
-    public void sourceDistribution(CopySpec sourceDistribution) {
-        this.sourceDistribution = sourceDistribution;
-    }
 
 }

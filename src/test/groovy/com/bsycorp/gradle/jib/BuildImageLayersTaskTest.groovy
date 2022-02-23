@@ -91,8 +91,8 @@ jib {
     imageOutputTarFile = new File("diff-image-path/image.tar", buildDir)
     baseContainer = 'scratch'
     layerFilters = [
-        layerFilter('jars', '/', { details -> details.name.endsWith(".jar") ? details : null }),
-        layerFilter('scripts', '/', { details -> details.name.endsWith(".jar") ? null : details })
+        layerFilter('jars', '/', { details -> if (!details.name.endsWith(".jar")) details.exclude() }),
+        layerFilter('scripts', '/', { details -> if(details.alreadyAddedToImage) details.exclude() })
     ]
 }
 """
@@ -133,8 +133,8 @@ jib {
     imageTag = 'test-image'
     baseContainer = 'scratch'
     layerFilters = [
-        layerFilter('jars', '/', { details -> details.name.endsWith(".jar") ? details : null }),
-        layerFilter('scripts', '/', { details -> !details.alreadyAddedToImage ? details : null })
+        layerFilter('jars', '/', { details -> if (!details.name.endsWith(".jar")) details.exclude() }),
+        layerFilter('scripts', '/', { details -> if (details.alreadyAddedToImage) details.exclude() })
     ]
 }
 """
@@ -174,7 +174,7 @@ jib {
     imageTag = provider { 'test-image' }
     baseContainer = 'alpine:latest'
     layerFilters = [
-        layerFilter('all', '/', { details -> details })
+        layerFilter('all', '/', { })
     ]
 }
 """

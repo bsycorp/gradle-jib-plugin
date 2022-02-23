@@ -1,20 +1,24 @@
 package com.bsycorp.gradle.jib
 
-import com.bsycorp.gradle.jib.tasks.ImageInputs
+import com.bsycorp.gradle.jib.models.LayerFilter
+import com.bsycorp.gradle.jib.models.LayerFilterConsumer
 import org.gradle.api.Project
+import org.gradle.api.distribution.Distribution
+import org.gradle.api.distribution.DistributionContainer
+import org.gradle.api.internal.file.copy.DefaultCopySpec
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
-import java.util.function.Function
 
-public class JibExtension implements ImageInputs {
+public class JibExtension {
 
     public Property<Path> baseCachePath;
     public Property<Path> appCachePath;
     public Property<String> sourceDistributionName;
+    public Property<String> sourceCopySpec;
     public ListProperty<LayerFilter> layerFilters;
     public Property<String> baseContainer;
     public Property<Boolean> timestampFromHash;
@@ -31,7 +35,16 @@ public class JibExtension implements ImageInputs {
             .convention(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-base-cache"));
         appCachePath = project.getObjects().property(Path.class)
             .convention(Paths.get(project.getRootProject().getProjectDir().getAbsolutePath(), "/.gradle/jib-app-cache"));
+        //expect 'main' distribution by default, but can be changed
         sourceDistributionName = project.getObjects().property(String.class).convention("main");
+        //don't expect CopySpec to be set manually, get it from distribution, but can be set and not use distribution at all..
+        sourceCopySpec = project.getObjects().property(DefaultCopySpec.class).convention(
+                sourceDistributionName.map((distributionName) -> {
+                    DistributionContainer container = project.getExtensions().findByType(DistributionContainer.class);
+                    Distribution distro = container.findByName(distributionName);
+                    return distro?.getContents();
+                })
+        )
         layerFilters = project.getObjects().listProperty(LayerFilter.class).convention(Collections.emptyList());
         timestampFromHash = project.getObjects().property(Boolean.class).convention(false);
         baseContainer = project.getObjects().property(String.class);
@@ -52,22 +65,22 @@ public class JibExtension implements ImageInputs {
         return appCachePath;
     }
 
-    @Override
     public Property<String> getSourceDistributionName() {
         return sourceDistributionName;
     }
 
-    @Override
+    public Property<DefaultCopySpec> getSourceCopySpec() {
+        return sourceCopySpec;
+    }
+
     public ListProperty<LayerFilter> getLayerFilters() {
         return layerFilters;
     }
 
-    @Override
     public Property<String> getBaseContainer() {
         return baseContainer;
     }
 
-    @Override
     public Property<Boolean> getTimestampFromHash() {
         return timestampFromHash;
     }
@@ -101,8 +114,16 @@ public class JibExtension implements ImageInputs {
     }
 
     //Helper method for defining layers
-    public LayerFilter layerFilter(String name, String destinationPath, Closure filter) {
-        //gotta dehydrate so it can serialise
-        return new LayerFilter(name, destinationPath, filter.dehydrate() as Function<LayerFilterFile, LayerFilterFile>)
+    public static LayerFilter layerFilter(String name, String destinationPath, Object filter) {
+        if (filter instanceof Closure) {
+            return new LayerFilter(name, destinationPath, (Closure) filter);
+
+        } else if (filter instanceof LayerFilterConsumer) {
+            return new LayerFilter(name, destinationPath, (LayerFilterConsumer) filter);
+
+        } else {
+            throw new RuntimeException("Unsupported type of filter: " + filter.getClass().getName())
+        }
     }
+
 }

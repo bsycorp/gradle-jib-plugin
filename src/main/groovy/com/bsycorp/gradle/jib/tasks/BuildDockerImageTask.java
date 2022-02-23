@@ -2,6 +2,8 @@ package com.bsycorp.gradle.jib.tasks;
 
 import com.bsycorp.gradle.jib.JibExtension;
 import com.bsycorp.gradle.jib.JibTaskSupport;
+import com.bsycorp.gradle.jib.models.NamedImageInputs;
+import com.bsycorp.gradle.jib.models.TaskProperties;
 import com.google.cloud.tools.jib.api.JibContainerBuilder;
 import com.google.cloud.tools.jib.api.buildplan.ContainerBuildPlan;
 import com.google.cloud.tools.jib.api.buildplan.FileEntriesLayer;
@@ -10,11 +12,8 @@ import com.google.cloud.tools.jib.cache.Cache;
 import com.google.cloud.tools.jib.cache.CachedLayer;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
-import org.gradle.api.file.CopySpec;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Exec;
-import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.nio.file.Path;
@@ -23,34 +22,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class BuildDockerImageTask extends Exec implements TaskProperties {
+public abstract class BuildDockerImageTask extends Exec implements TaskProperties, NamedImageInputs {
 
     protected JibTaskSupport taskSupport;
     protected JibExtension extension;
     protected Logger logger;
-    private CopySpec sourceDistribution;
     private Path rootProjectPath;
     private File projectBuildDir;
-
-    @Input
-    public abstract Property<String> getImageTag();
 
     public BuildDockerImageTask() {
         super();
         setupProperties(getProject());
-        getImageTag().set(extension().getImageTag());
+        setupNamedImageInputs(getProject(), extension);
+
+        dependsOn("buildImageLayers");
 
         this.rootProjectPath = getProject().getRootProject().getProjectDir().toPath();
         this.projectBuildDir = getProject().getBuildDir();
 
-        dependsOn("buildImageLayers");
     }
 
     @Override
     @TaskAction
     public void exec() {
         try {
-            JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, sourceDistribution);
+            //need to deconstruct distribution at config time and pull out requisite pieces to reconstruct later?
+            JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, getSourceCopySpec().get());
             ContainerBuildPlan containerBuildPlan = containerBuilder.toContainerBuildPlan();
             Cache jibCache = Cache.withDirectory(extension.getAppCachePath().get());
             String dockerBinaryPath = extension.getDockerBinaryPath().get();
@@ -127,8 +124,4 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
         this.taskSupport = taskSupport;
     }
 
-    @Override
-    public void sourceDistribution(CopySpec sourceDistribution) {
-        this.sourceDistribution = sourceDistribution;
-    }
 }

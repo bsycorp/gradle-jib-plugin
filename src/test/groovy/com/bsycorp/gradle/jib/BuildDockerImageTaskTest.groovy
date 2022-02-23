@@ -19,12 +19,24 @@ class BuildDockerImageTaskTest {
     @BeforeEach
     public void setup() {
         settingsFile = new File(testProjectDir, "settings.gradle");
-        settingsFile.text = "rootProject.name = 'test-case'";
+        settingsFile.text = """
+rootProject.name = 'test-case'
+buildCache {
+    local {
+        enabled = true
+    }
+}
+""";
         buildFile = new File(testProjectDir, "build.gradle");
     }
 
     @Test
     void shouldRunSuccessfully() {
+        File mainClass = new File(testProjectDir, "src/main/java/test/Main.java");
+        mainClass.getParentFile().mkdirs();
+        mainClass.text = """
+package test;
+"""
         buildFile.text = """
 plugins { id 'io.github.bsycorp.jib' }
 plugins { id 'application' }
@@ -36,7 +48,7 @@ jib {
     imageEntrypoint = ['/app/bin/test-case']
     baseContainer = 'scratch'
     layerFilters = [
-        layerFilter('all', '/', { details -> details })
+        layerFilter('all', '/', { })
     ]
     dockerBinaryPath = 'true' //override docker path so tests dont actually call docker, just noop
 }
@@ -46,6 +58,7 @@ jib {
                 .withArguments("buildDockerImage", "-i", "--stacktrace")
                 .withPluginClasspath()
                 .build();
+        println result.getOutput()
 
         Assertions.assertEquals(TaskOutcome.SKIPPED, result.tasks.find { it.path == ":pullBaseImage" }.outcome)
         Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":jar" }.outcome)
@@ -71,5 +84,29 @@ ENTRYPOINT ["/app/bin/test-case"]
 """.trim(),
             new File("${testProjectDir}/build/dockerfile/Dockerfile.dockerignore").text.trim()
         )
+
+        //change the file and re-build, ensure inputs trigger tasks on re-run
+        mainClass.text = mainClass.text + "\n    public class Main { }\n"
+        result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("buildDockerImage", "--configuration-cache", "-i", "--stacktrace")
+                .withPluginClasspath()
+                .build();
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":compileJava" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":jar" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":buildImageLayers" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":buildDockerImage" }.outcome)
+
+        //re-run with config cache on a second time, should be all up-to-date
+        result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("buildDockerImage", "--configuration-cache", "-i", "--stacktrace")
+                .withPluginClasspath()
+                .build();
+        println result.getOutput()
+        Assertions.assertEquals(TaskOutcome.UP_TO_DATE, result.tasks.find { it.path == ":compileJava" }.outcome)
+        Assertions.assertEquals(TaskOutcome.UP_TO_DATE, result.tasks.find { it.path == ":jar" }.outcome)
+        Assertions.assertEquals(TaskOutcome.UP_TO_DATE, result.tasks.find { it.path == ":buildImageLayers" }.outcome)
+        Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":buildDockerImage" }.outcome)
     }
 }

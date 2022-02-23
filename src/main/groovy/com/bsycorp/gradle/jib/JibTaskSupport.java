@@ -1,6 +1,9 @@
 package com.bsycorp.gradle.jib;
 
-import com.bsycorp.gradle.jib.tasks.ImageInputs;
+import com.bsycorp.gradle.jib.models.BuiltImageInputs;
+import com.bsycorp.gradle.jib.models.LayerFilter;
+import com.bsycorp.gradle.jib.models.LayerFilterConsumer;
+import com.bsycorp.gradle.jib.models.LayerFilterFile;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.ImageReference;
 import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
@@ -26,7 +29,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class JibTaskSupport {
 
@@ -42,7 +44,7 @@ public class JibTaskSupport {
         this.objectFactory = objectFactory;
     }
 
-    public List<FileCopyDetails> getFilesForLayer(CopySpec sourceDistributionFiles, List<FileCopyDetails> filesAlreadyAddedToImage, Function<LayerFilterFile, LayerFilterFile> filter) {
+    public List<FileCopyDetails> getFilesForLayer(CopySpec sourceDistributionFiles, List<FileCopyDetails> filesAlreadyAddedToImage, LayerFilterConsumer filter) {
         List<FileCopyDetails> layerFiles = new ArrayList();
 
         //use the innards of a CopyAction to resolve the CopySpec into a set of FileCopyDetails _after_ renaming / processing
@@ -51,11 +53,12 @@ public class JibTaskSupport {
         //but we can avoid the entire tar step doing it this way
         CopyAction copyAction = (stream) -> {
             stream.process(details -> {
-                LayerFilterFile result = filter.apply(new LayerFilterFile(details, filesAlreadyAddedToImage.contains(details)));
-                if(result != null) {
-                    layerFiles.add(result.getDetails());
-                    filesAlreadyAddedToImage.add(result.getDetails());
-                    logger.info("Added file: " + result.getDetails().getFile() + "  " + result.getPath());
+                LayerFilterFile layerFile = new LayerFilterFile(details, filesAlreadyAddedToImage.contains(details));
+                filter.execute(layerFile);
+                if(!layerFile.isExcluded()) {
+                    layerFiles.add(layerFile.getDetails());
+                    filesAlreadyAddedToImage.add(layerFile.getDetails());
+                    logger.info("Added file: " + layerFile.getDetails().getFile() + "  " + layerFile.getPath());
                 }
             });
             return WorkResults.didWork(true);
@@ -64,7 +67,7 @@ public class JibTaskSupport {
         return layerFiles;
     }
 
-    public FileEntriesLayer getLayerForFiles(List<FileCopyDetails> files, String destinationPath, Boolean timestampFromHash) {
+    public FileEntriesLayer getLayerForFiles(String layerName, List<FileCopyDetails> files, String destinationPath, Boolean timestampFromHash) {
         if (destinationPath == null) {
             destinationPath = "/";
         }
@@ -73,6 +76,8 @@ public class JibTaskSupport {
         }
 
         FileEntriesLayer.Builder layerBuilder = FileEntriesLayer.builder();
+        layerBuilder.setName(layerName);
+
         for (FileCopyDetails file : files) {
             AbsoluteUnixPath targetPath = AbsoluteUnixPath.fromPath(Paths.get(destinationPath, file.getPath()));
             FilePermissions filePermission = Files.isExecutable(file.getFile().toPath()) ? FilePermissions.fromOctalString("755") : FilePermissions.DEFAULT_FILE_PERMISSIONS;
@@ -112,7 +117,7 @@ public class JibTaskSupport {
         return registryImage;
     }
 
-    public JibContainerBuilder getJibContainer(ImageInputs imageInputs, CopySpec sourceDistributionFiles) throws Exception {
+    public JibContainerBuilder getJibContainer(BuiltImageInputs imageInputs, CopySpec sourceDistributionFiles) throws Exception {
         String baseContainer = imageInputs.getBaseContainer().get();
         List<String> entrypoint = imageInputs.getImageEntrypoint().getOrNull();
         List<LayerFilter> layerFilters = imageInputs.getLayerFilters().get();
@@ -135,7 +140,7 @@ public class JibTaskSupport {
         for (LayerFilter filter : layerFilters) {
             logger.info("Processing image layer named: " + filter.getName());
             List<FileCopyDetails> filterFiles = getFilesForLayer(sourceDistributionFiles, filesAlreadyAddedToImage, filter.getFilter());
-            FileEntriesLayer filterLayer = getLayerForFiles(filterFiles, filter.getDestinationPath(), timestampFromHash);
+            FileEntriesLayer filterLayer = getLayerForFiles(filter.getName(), filterFiles, filter.getDestinationPath(), timestampFromHash);
             containerBuilder
                     .addFileEntriesLayer(filterLayer);
         }

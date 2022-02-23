@@ -1,4 +1,4 @@
-package com.bsycorp.gradle.jib;
+package com.bsycorp.gradle.jib.models;
 
 import org.gradle.api.file.FileCopyDetails;
 
@@ -6,6 +6,7 @@ public class LayerFilterFile {
 
     private FileCopyDetails details;
     private boolean alreadyAddedToImage;
+    private boolean includedInLayer = true;
 
     public LayerFilterFile(FileCopyDetails details, boolean alreadyAddedToImage) {
         this.details = details;
@@ -34,5 +35,14 @@ public class LayerFilterFile {
 
     public String getPath() {
         return details.getPath();
+    }
+
+    public void exclude() {
+        includedInLayer = false;
+    }
+
+    public boolean isExcluded() {
+        System.out.println("is included: " + includedInLayer);
+        return !includedInLayer;
     }
 }

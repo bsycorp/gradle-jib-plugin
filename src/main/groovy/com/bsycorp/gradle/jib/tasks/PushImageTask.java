@@ -1,5 +1,6 @@
 package com.bsycorp.gradle.jib.tasks;
 
+import com.bsycorp.gradle.jib.models.BuiltImageInputs;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.JibContainerBuilder;
 import com.google.cloud.tools.jib.api.LogEvent;
@@ -9,7 +10,7 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 
-public abstract class PushImageTask extends BaseTask {
+public abstract class PushImageTask extends BaseTask implements BuiltImageInputs {
 
     @Input
     public abstract Property<String> getImageTag();
@@ -19,6 +20,8 @@ public abstract class PushImageTask extends BaseTask {
 
     public PushImageTask() {
         super();
+        setupBuiltImageInputs(getProject(), extension);
+
         dependsOn("buildImageLayers");
         projectName = getProject().getName();
         getImageTag().set(extension().getImageTag());
@@ -30,9 +33,7 @@ public abstract class PushImageTask extends BaseTask {
 
     @TaskAction
     public void fire() throws Exception {
-        super.fire();
-
-        JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, sourceDistribution);
+        JibContainerBuilder containerBuilder = taskSupport.getJibContainer(this, getSourceCopySpec().get());
         Containerizer output = taskSupport.getContainerizer(taskSupport.getJibRegistryImage(getImageTag().get()));
         if (extension.getLogProgress().get()) {
             output.addEventHandler(TimerEvent.class, timeEvent -> {
