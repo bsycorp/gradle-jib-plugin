@@ -51,7 +51,7 @@ jib {
     //where most of the complexity will be, defining the layers in order
     layerFilters = [
         // layerFilter(String layerName, String destinationPath, closure taking FileCopyDetails and returning files to return)
-        layerFilter('all', '/', { details -> details })
+        layerFilter('all', '/', { details -> })
     ]
     
     //optional
@@ -72,18 +72,13 @@ jib {
     baseContainer = 'some-registry/base-image-name:1.0'
     imageEntrypoint = ["/bin/service"]
     layerFilters = [
-        //include files in 'lib' as a common-base, don't include our 1st party jars in base
-        layerFilter('common-base', '/', { (it.path.startsWith('lib') && !it.name.startsWith('internal-')) ? it : null }),
+        //exclude all files not in 'lib' as a common-base, don't include our 1st party jars in base
+        layerFilter('common-base', '/', { if (!(it.path.startsWith('lib') && !it.name.startsWith('internal-'))) it.exclude() }),
         
-        //include all the other files like /bin/ in a second layer and rename bin files to make name consistent for entrypoint
+        //exclude all files already in another layer, leaving files like /bin/ in a second layer and rename bin files to make name consistent for entrypoint
         layerFilter('app', '/', { ->
-            if (!it.alreadyAddedToImage) {
-                if (it.path.startsWith("bin/${applicationName}")) {
-                    it.name = it.name.replaceFirst(applicationName, "service")
-                }
-                return it
-            } else {
-                return null
+            if (it.alreadyAddedToImage) {
+                it.exclude()
             }
         })
     ]
