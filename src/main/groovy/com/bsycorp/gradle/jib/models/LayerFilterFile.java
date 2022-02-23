@@ -42,7 +42,6 @@ public class LayerFilterFile {
     }
 
     public boolean isExcluded() {
-        System.out.println("is included: " + includedInLayer);
         return !includedInLayer;
     }
 }
