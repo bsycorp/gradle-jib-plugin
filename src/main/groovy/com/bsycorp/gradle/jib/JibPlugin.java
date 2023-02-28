@@ -23,19 +23,20 @@ public class JibPlugin implements Plugin<Project> {
         });
         project.getTasks().register("pushImage", PushImageTask.class);
 
-        if (extension.getEnsureReproducible().get()) {
-            project.getTasks().withType(Zip.class).configureEach(task -> {
-                task.setPreserveFileTimestamps(false);
-                task.setReproducibleFileOrder(true);
-            });
-            project.getTasks().withType(Jar.class).configureEach(task -> {
-                task.setPreserveFileTimestamps(false);
-                task.setReproducibleFileOrder(true);
-            });
-            project.getTasks().withType(Tar.class).configureEach(task -> {
-                task.setPreserveFileTimestamps(false);
-                task.setReproducibleFileOrder(true);
-            });
-        }
+        project.getTasks().withType(Zip.class).configureEach(task -> {
+            var reproducible = extension.getEnsureReproducible().get();
+            task.setPreserveFileTimestamps(!reproducible);
+            task.setReproducibleFileOrder(reproducible);
+        });
+        project.getTasks().withType(Jar.class).configureEach(task -> {
+            var reproducible = extension.getEnsureReproducible().get();
+            task.setPreserveFileTimestamps(!reproducible);
+            task.setReproducibleFileOrder(reproducible);
+        });
+        project.getTasks().withType(Tar.class).configureEach(task -> {
+            var reproducible = extension.getEnsureReproducible().get();
+            task.setPreserveFileTimestamps(!reproducible);
+            task.setReproducibleFileOrder(reproducible);
+        });
     }
 }
