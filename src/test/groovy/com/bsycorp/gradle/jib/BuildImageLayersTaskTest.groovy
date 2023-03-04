@@ -1,6 +1,5 @@
 package com.bsycorp.gradle.jib
 
-import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -8,6 +7,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+
+import java.nio.file.Paths
+
+import static com.bsycorp.gradle.jib.FileUtil.countFiles
 
 class BuildImageLayersTaskTest {
 
@@ -108,9 +111,9 @@ jib {
 
         //assert built output
         //from scratch so 0 base cache items
-        Assertions.assertEquals(0, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-base-cache/"), null, true).size());
+        Assertions.assertEquals(0, countFiles(Paths.get("${testProjectDir}/.gradle/jib-base-cache/")))
         //2 layers should exist
-        Assertions.assertEquals(2, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-app-cache/layers/"), null, true).size());
+        Assertions.assertEquals(2, countFiles(Paths.get("${testProjectDir}/.gradle/jib-app-cache/layers/")))
         //and image tar should be there too
         Assertions.assertTrue(new File("${testProjectDir}/build/diff-image-path/image.tar").exists())
         Assertions.assertTrue(new File("${testProjectDir}/build/diff-image-path/image.image-id").exists())
@@ -150,9 +153,9 @@ jib {
 
         //assert built output
         //from scratch so 0 base cache items
-        Assertions.assertEquals(0, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-base-cache/"), null, true).size());
+        Assertions.assertEquals(0, countFiles(Paths.get("${testProjectDir}/.gradle/jib-base-cache/")))
         //2 layers should exist
-        Assertions.assertEquals(2, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-app-cache/layers/"), null, true).size());
+        Assertions.assertEquals(2, countFiles(Paths.get("${testProjectDir}/.gradle/jib-app-cache/layers/")))
         //and image tar should be there too
         Assertions.assertTrue(new File("${testProjectDir}/build/image-tar/image.tar").exists())
     }
@@ -190,9 +193,9 @@ jib {
 
         //assert built output
         //from scratch so 0 base cache items
-        Assertions.assertTrue(FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-base-cache/"), null, true).size() > 0);
+        Assertions.assertTrue(countFiles(Paths.get("${testProjectDir}/.gradle/jib-base-cache/")) > 0)
         //2 layers should exist
-        Assertions.assertEquals(1, FileUtils.listFiles(new File("${testProjectDir}/.gradle/jib-app-cache/layers/"), null, true).size());
+        Assertions.assertEquals(1, countFiles(Paths.get("${testProjectDir}/.gradle/jib-app-cache/layers/")))
         //and image tar should be there too
         Assertions.assertTrue(new File("${testProjectDir}/build/image-tar/image.tar").exists())
     }

@@ -11,12 +11,13 @@ import com.google.cloud.tools.jib.api.buildplan.LayerObject;
 import com.google.cloud.tools.jib.cache.Cache;
 import com.google.cloud.tools.jib.cache.CachedLayer;
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.Exec;
 import org.gradle.api.tasks.TaskAction;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -86,15 +87,15 @@ public abstract class BuildDockerImageTask extends Exec implements TaskPropertie
                 dockerFileContent.append("ENTRYPOINT [" + containerBuildPlan.getEntrypoint().stream().map( i -> "\"" + i + "\"").collect(Collectors.joining(", ")) + "]");
             }
             //TODO make this configurable
-            File dockerFile = new File(projectBuildDir.getAbsolutePath() + "/dockerfile/Dockerfile");
-            File dockerIgnoreFile = new File(projectBuildDir.getAbsolutePath() + "/dockerfile/Dockerfile.dockerignore");
-            dockerFile.getParentFile().mkdirs();
+            Path dockerFile = Paths.get(projectBuildDir.getAbsolutePath(), "dockerfile/Dockerfile");
+            Path dockerIgnoreFile = Paths.get(projectBuildDir.getAbsolutePath(), "dockerfile/Dockerfile.dockerignore");
+            Files.createDirectories(dockerFile.getParent());
 
-            FileUtils.writeStringToFile(dockerFile, dockerFileContent.toString(), "UTF-8");
-            FileUtils.writeStringToFile(dockerIgnoreFile, dockerIgnoreFileContent.toString(), "UTF-8");
+            Files.writeString(dockerFile, dockerFileContent.toString());
+            Files.writeString(dockerIgnoreFile, dockerIgnoreFileContent.toString());
 
             environment("DOCKER_BUILDKIT", "1");
-            commandLine(dockerBinaryPath, "build", "-f", dockerFile.getAbsolutePath(), "-t", getImageTag().get(), rootProjectPath.toFile().getAbsolutePath());
+            commandLine(dockerBinaryPath, "build", "-f", dockerFile, "-t", getImageTag().get(), rootProjectPath.toAbsolutePath());
 
             //call actual exec task
             super.exec();
