@@ -4,13 +4,14 @@ import com.bsycorp.gradle.jib.models.BuiltImageInputs;
 import com.google.cloud.tools.jib.api.Containerizer;
 import com.google.cloud.tools.jib.api.JibContainer;
 import com.google.cloud.tools.jib.api.TarImage;
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.plugins.ApplicationPlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public abstract class BuildImageLayersTask extends BaseTask implements BuiltImageInputs {
 
@@ -53,11 +54,9 @@ public abstract class BuildImageLayersTask extends BaseTask implements BuiltImag
         JibContainer builtContainer = taskSupport.getJibContainer(this, getSourceCopySpec().get())
                 .containerize(tarContainer);
         //write out image id so can be used by other tasks
-        FileUtils.writeStringToFile(
-                getImageOutputImageIdFile().get(),
-                builtContainer.getImageId().getHash(),
-                "UTF-8"
-        );
+        Path imageIdFile = getImageOutputImageIdFile().get().toPath();
+        Files.createDirectories(imageIdFile.getParent());
+        Files.writeString(imageIdFile, builtContainer.getImageId().getHash());
 
     }
 }

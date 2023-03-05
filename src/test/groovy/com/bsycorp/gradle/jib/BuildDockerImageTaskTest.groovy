@@ -1,6 +1,5 @@
 package com.bsycorp.gradle.jib
 
-import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -8,6 +7,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+
+import java.nio.file.Paths
+
+import static com.bsycorp.gradle.jib.FileUtil.countFiles
 
 class BuildDockerImageTaskTest {
 
@@ -67,7 +70,7 @@ jib {
         Assertions.assertEquals(TaskOutcome.SUCCESS, result.tasks.find { it.path == ":buildDockerImage" }.outcome)
 
         //assert built output
-        Assertions.assertEquals(2, FileUtils.listFiles(new File("${testProjectDir}/build/dockerfile/"), null, true).size());
+        Assertions.assertEquals(2, countFiles(Paths.get("${testProjectDir}/build/dockerfile/")))
         Assertions.assertEquals("""
 FROM scratch
 WORKDIR /app
